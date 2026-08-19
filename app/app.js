@@ -206,22 +206,11 @@ async function runAndRenderStage(stageId, card, spec) {
 function renderStageResult(card, stageId, spec, result) {
   const body = card.querySelector(".stage-body");
   const modeTag = `<span class="mode-tag ${result.mode}">${result.mode === "live" ? "Live" : "Offline sim"}</span>`;
-  let extraControls = "";
-
-  if (stageId === "career_assessment" && result.output.recommendations?.length) {
-    extraControls = `<div class="branch-pick"><strong>Pick your target branch to continue:</strong><br>${result.output.recommendations.map(r => `<button class="chip" data-branch="${r.branch}">${r.branch} (${r.fitScore})</button>`).join(" ")}</div>`;
-  }
-  if (stageId === "college_comparison" && result.output.ranked?.length) {
-    extraControls = `<div class="save-list">${result.output.ranked.map(r => {
-      const c = COLLEGES.find(x => x.id === r.collegeId);
-      return `<button class="chip save-chip" data-save="${r.collegeId}">☆ Save ${escapeHtml(c?.name || r.collegeId)}</button>`;
-    }).join(" ")}</div>`;
-  }
+  const ctx = { profile: STORE.getProfile(), shortlist: STORE.getShortlist() };
 
   body.innerHTML = `
     ${modeTag}
-    ${prettyRender(result.output)}
-    ${extraControls}
+    ${renderStageOutput(stageId, result.output, ctx)}
     <details class="prompt-view">
       <summary>View prompt used (${result.version})</summary>
       <p><strong>System:</strong></p><pre>${escapeHtml(result.prompt.system)}</pre>
@@ -240,11 +229,15 @@ function renderStageResult(card, stageId, spec, result) {
 
   card.querySelectorAll("[data-branch]").forEach(btn => btn.addEventListener("click", () => {
     const p = STORE.getProfile(); p.branch = btn.dataset.branch; STORE.setProfile(p);
-    card.querySelectorAll("[data-branch]").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
+    card.querySelectorAll("[data-branch]").forEach(b => {
+      const isThis = b === btn;
+      b.classList.toggle("selected", isThis);
+      b.closest(".branch-row")?.classList.toggle("is-selected", isThis);
+      b.textContent = isThis ? "✓ Selected as target branch" : "Select this branch";
+    });
   }));
   card.querySelectorAll("[data-save]").forEach(btn => btn.addEventListener("click", () => {
-    STORE.addShortlist(btn.dataset.save); btn.textContent = "★ Saved"; btn.disabled = true;
+    STORE.addShortlist(btn.dataset.save); btn.textContent = "★ Saved"; btn.disabled = true; btn.classList.add("selected");
   }));
   card.querySelector(".regen")?.addEventListener("click", async () => {
     delete assistantState.results[stageId];
@@ -259,7 +252,10 @@ function renderStageResult(card, stageId, spec, result) {
     const box = card.querySelector(".refine-result");
     box.innerHTML = `<span class="spinner"></span> Revising…`;
     const rev = await ENGINE.runRefine(spec.label, result.output, feedback);
-    box.innerHTML = `<div class="mode-tag ${rev.mode}">${rev.mode === "live" ? "Live" : "Offline sim"}</div>${prettyRender(rev.output)}
+    const revisedHtml = rev.output.revised ? renderStageOutput(stageId, rev.output.revised, ctx) : prettyRender(rev.output);
+    const whatChanged = (rev.output.what_changed || []).length
+      ? `<div class="verify-box"><strong>What changed:</strong> ${chipList(rev.output.what_changed)}${rev.output.why ? `<p class="muted">${escapeHtml(rev.output.why)}</p>` : ""}</div>` : "";
+    box.innerHTML = `<div class="mode-tag ${rev.mode}">${rev.mode === "live" ? "Live" : "Offline sim"}</div>${whatChanged}${revisedHtml}
       <details class="prompt-view"><summary>View refine prompt</summary><pre>${escapeHtml(rev.prompt.system)}\n\n${escapeHtml(rev.prompt.user)}</pre></details>`;
   });
   card.querySelector(".next")?.addEventListener("click", async () => {
@@ -380,7 +376,8 @@ function renderPromptLabTab() {
       } else {
         result = await ENGINE.runStage(stageId, stageCtx(stageId), { version });
       }
-      out.innerHTML = `<div class="mode-tag ${result.mode}">${result.mode}</div>${prettyRender(result.output)}`;
+      const ctx = { profile: STORE.getProfile(), shortlist: STORE.getShortlist(), readOnly: true };
+      out.innerHTML = `<div class="mode-tag ${result.mode}">${result.mode}</div>${renderStageOutput(stageId, result.output, ctx)}`;
     } catch (err) {
       out.innerHTML = `<p class="error">${escapeHtml(err.message)}</p>`;
     }

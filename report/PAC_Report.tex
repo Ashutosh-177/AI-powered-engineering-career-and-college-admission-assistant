@@ -271,7 +271,7 @@ The interface is a static six-tab single-page app (screenshots below are from th
 
 \begin{enumerate}
 \item \textbf{Profile} -- academic \%, strongest subject, interests, target exam, target college types, home/preferred states, budget; an explicit, separately-collapsed optional section for gender/category/income/disability used \emph{only} by the scholarship stage (Fig.~\ref{fig:profile}).
-\item \textbf{Assistant} -- the guided, chained flow through all 8 stages, each stage showing its mode badge, structured output, prompt-view, refine box, and Continue button (Fig.~\ref{fig:assistant}).
+\item \textbf{Assistant} -- the guided, chained flow through all 8 stages, each stage showing its mode badge, structured output, prompt-view, refine box, and Continue button. Every stage has a purpose-built renderer rather than a generic JSON dump: branch fit scores as progress bars (Fig.~\ref{fig:assistant}), ranked colleges as cards with resolved names and color-coded strength/tradeoff lists (Fig.~\ref{fig:collegecards}), and similarly a timeline for the roadmap, a glossary grid for counselling terms, and a stat callout for salary range.
 \item \textbf{Colleges} -- full reference dataset as a sortable-by-eye table with a save-to-shortlist star per row and a persistent verification disclaimer (Fig.~\ref{fig:colleges}).
 \item \textbf{Prompt Lab} -- V1-vs-V2 comparison workbench described in \S\ref{sec:versions} (Fig.~\ref{fig:promptlab}).
 \item \textbf{Saved \& History} -- shortlist management, one-click ``Download personalized report'' (self-contained HTML file compiled from the profile and every stage's output), and a running counselling-history log.
@@ -290,6 +290,13 @@ The interface is a static six-tab single-page app (screenshots below are from th
 \includegraphics[width=0.85\textwidth]{figures/fig-assistant.png}
 \caption{Assistant tab -- Career Assessment stage output with reasoning, branch picker, and prompt-view toggle.}
 \label{fig:assistant}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig-college-cards.png}
+\caption{College Comparison stage -- ranked cards with resolved college names, a color-coded fit ring, checkmarked strengths, and flagged budget/placement tradeoffs (no raw ids or generic JSON dumps).}
+\label{fig:collegecards}
 \end{figure}
 
 \begin{figure}[htbp]
