@@ -1,0 +1,42 @@
+{
+  "steps": [
+    {
+      "step": "Registration",
+      "explanation": "Register on the relevant counselling portal after results are declared."
+    },
+    {
+      "step": "Choice filling",
+      "explanation": "List colleges/branches in your true order of preference — order matters more than caution."
+    },
+    {
+      "step": "Seat allotment",
+      "explanation": "An algorithm allots the best possible seat from your list based on rank and seat availability."
+    },
+    {
+      "step": "Freeze / Float / Slide",
+      "explanation": "Freeze locks your seat; float keeps you eligible for a better one in later rounds; slide keeps you within the same institute for a better branch."
+    },
+    {
+      "step": "Reporting & fee payment",
+      "explanation": "Complete document verification and pay the confirmation fee within the deadline or lose the seat."
+    }
+  ],
+  "key_terms": [
+    {
+      "term": "Freeze",
+      "meaning": "Accept and lock the current allotted seat; you exit further rounds."
+    },
+    {
+      "term": "Float",
+      "meaning": "Stay open to a better college/branch in the next round; risk losing current allotment if you don't respond in time."
+    },
+    {
+      "term": "Slide",
+      "meaning": "Stay in the same institute but remain open to a better branch."
+    }
+  ],
+  "official_sources": [
+    "JoSAA official website",
+    "CSAB official website"
+  ]
+}

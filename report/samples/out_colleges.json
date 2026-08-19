@@ -1,0 +1,106 @@
+{
+  "ranked": [
+    {
+      "collegeId": "nit-t",
+      "overallFit": 82,
+      "strengths": [
+        "High placement rate (90%)",
+        "High research activity",
+        "Strong student review score (4.4/5)"
+      ],
+      "tradeoffs": [],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "nit-w",
+      "overallFit": 81,
+      "strengths": [
+        "High research activity",
+        "Strong student review score (4.4/5)"
+      ],
+      "tradeoffs": [],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "coep",
+      "overallFit": 76,
+      "strengths": [],
+      "tradeoffs": [
+        "Lower placement rate (82%) than top options"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "iit-d",
+      "overallFit": 64,
+      "strengths": [
+        "High placement rate (95%)",
+        "Strong average package (~₹22 LPA)",
+        "Very High research activity",
+        "Strong student review score (4.6/5)"
+      ],
+      "tradeoffs": [
+        "Fees (₹230000/yr) exceed stated budget (₹200000/yr)"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "iit-b",
+      "overallFit": 63,
+      "strengths": [
+        "High placement rate (95%)",
+        "Strong average package (~₹21 LPA)",
+        "Strong student review score (4.6/5)"
+      ],
+      "tradeoffs": [
+        "Fees (₹230000/yr) exceed stated budget (₹200000/yr)"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "bits-p",
+      "overallFit": 54,
+      "strengths": [
+        "High placement rate (92%)",
+        "Strong average package (~₹18 LPA)",
+        "High research activity",
+        "Strong student review score (4.5/5)"
+      ],
+      "tradeoffs": [
+        "Fees (₹520000/yr) exceed stated budget (₹200000/yr)"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "manipal",
+      "overallFit": 46,
+      "strengths": [],
+      "tradeoffs": [
+        "Fees (₹480000/yr) exceed stated budget (₹200000/yr)",
+        "Lower placement rate (83%) than top options"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    },
+    {
+      "collegeId": "vit-v",
+      "overallFit": 45,
+      "strengths": [],
+      "tradeoffs": [
+        "Fees (₹220000/yr) exceed stated budget (₹200000/yr)"
+      ],
+      "reasoning": "Scored on placement rate, average package, student reviews, accreditation, and budget fit against this student's stated budget."
+    }
+  ],
+  "budget_flags": [
+    "iit-d",
+    "iit-b",
+    "bits-p",
+    "manipal",
+    "vit-v"
+  ],
+  "verify_before_deciding": [
+    "current NIRF ranking",
+    "latest official placement report",
+    "AICTE/UGC approval status for the current academic year"
+  ]
+}

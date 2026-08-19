@@ -1,0 +1,21 @@
+{
+  "needs_clarification": false,
+  "questions": [],
+  "recommendations": [
+    {
+      "branch": "CSE",
+      "fitScore": 37,
+      "reasoning": "General recommendation (baseline prompt had no structured schema, few-shot example, or reasoning requirement)."
+    },
+    {
+      "branch": "AIDS",
+      "fitScore": 37,
+      "reasoning": "General recommendation (baseline prompt had no structured schema, few-shot example, or reasoning requirement)."
+    },
+    {
+      "branch": "EEE",
+      "fitScore": 15,
+      "reasoning": "General recommendation (baseline prompt had no structured schema, few-shot example, or reasoning requirement)."
+    }
+  ]
+}

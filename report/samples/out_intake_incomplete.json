@@ -1,0 +1,16 @@
+{
+  "profile_complete": false,
+  "missing_or_ambiguous": [
+    "academicPercentage",
+    "entranceExam/examIntent",
+    "interests",
+    "preferredStates (or 'any')",
+    "budgetPerYear (or 'not sure')"
+  ],
+  "clarifying_questions": [
+    "What's your latest Class 12 (or pre-board) percentage?",
+    "Which entrance exam(s) are you targeting or already appeared for?",
+    "What subjects or activities genuinely interest you (e.g. coding, circuits, building things)?"
+  ],
+  "reasoning": "These fields directly drive branch-fit scoring and college shortlisting, so guessing them would produce unreliable recommendations."
+}

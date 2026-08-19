@@ -1,0 +1,31 @@
+{
+  "needs_clarification": false,
+  "questions": [],
+  "recommendations": [
+    {
+      "branch": "CSE",
+      "fitScore": 37,
+      "reasoning": "Computer Science & Engineering: matches stated interest(s) \"coding\"; aligns with strongest subject (Maths)."
+    },
+    {
+      "branch": "AIDS",
+      "fitScore": 37,
+      "reasoning": "AI & Data Science: matches stated interest(s) \"data science\"; aligns with strongest subject (Maths)."
+    },
+    {
+      "branch": "EEE",
+      "fitScore": 15,
+      "reasoning": "Electrical & Electronics Engineering: aligns with strongest subject (Maths)."
+    },
+    {
+      "branch": "ECE",
+      "fitScore": 10,
+      "reasoning": "Electronics & Communication Engineering: weak signal from current profile — worth exploring if other options don't fit."
+    },
+    {
+      "branch": "MECH",
+      "fitScore": 10,
+      "reasoning": "Mechanical Engineering: weak signal from current profile — worth exploring if other options don't fit."
+    }
+  ]
+}

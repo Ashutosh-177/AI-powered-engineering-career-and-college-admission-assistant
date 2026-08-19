@@ -1,0 +1,22 @@
+{
+  "matches": [
+    {
+      "name": "AICTE Pragati Scholarship (for girl students)",
+      "likelihood": "likely",
+      "reasoning": "Matches gender criterion; confirm income cutoff.",
+      "action": "Apply via National Scholarship Portal (NSP)."
+    },
+    {
+      "name": "State Post-Matric / EBC Scholarships",
+      "likelihood": "possible",
+      "reasoning": "Category (OBC) often qualifies for state EBC/post-matric schemes.",
+      "action": "Check your state's scholarship portal."
+    },
+    {
+      "name": "Institute Merit-cum-Means Scholarships",
+      "likelihood": "check details",
+      "reasoning": "Depends on final admitted college's own policy.",
+      "action": "Ask the college's financial aid office after admission."
+    }
+  ]
+}

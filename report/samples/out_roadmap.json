@@ -1,0 +1,56 @@
+{
+  "timeline": [
+    {
+      "period": "Aug 2026",
+      "milestone": "Finalize target branches & exams; build a study schedule",
+      "action_items": [
+        "Confirm shortlist from career assessment",
+        "Register for chosen entrance exam(s)"
+      ]
+    },
+    {
+      "period": "Next 2-3 months",
+      "milestone": "Core exam preparation",
+      "action_items": [
+        "Daily practice tests",
+        "Track weak topics weekly"
+      ]
+    },
+    {
+      "period": "Jan & Apr sessions",
+      "milestone": "Appear for JEE Main",
+      "action_items": [
+        "Carry admit card + valid ID",
+        "Reach center early"
+      ]
+    },
+    {
+      "period": "Post-results",
+      "milestone": "Choice filling & counselling registration",
+      "action_items": [
+        "Register on JoSAA/CSAB/state portal",
+        "Prepare document set",
+        "Rank colleges realistically using saved comparisons"
+      ]
+    },
+    {
+      "period": "Counselling rounds",
+      "milestone": "Seat allotment, freeze/float/slide decisions, reporting",
+      "action_items": [
+        "Track each round's deadline",
+        "Pay confirmation fee on time"
+      ]
+    }
+  ],
+  "document_checklist": [
+    "Class 10 & 12 marksheets",
+    "Entrance exam scorecard/admit card",
+    "Category/income certificate (if applicable)",
+    "Passport-size photos",
+    "Address & ID proof"
+  ],
+  "contingency_notes": [
+    "If score is below expectation, revisit the state CET / private-college backup track rather than waiting only on JEE Advanced.",
+    "Keep 2-3 backup colleges from the saved shortlist ready before counselling rounds open."
+  ]
+}

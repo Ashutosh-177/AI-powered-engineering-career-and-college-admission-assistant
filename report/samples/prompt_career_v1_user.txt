@@ -1,0 +1,1 @@
+Given this student profile, suggest 3 good engineering branches: {"name":"Aarav","academicPercentage":88,"strongSubject":"Maths","interests":["coding","data science"],"examIntent":true,"collegeTypes":["NIT"],"homeState":"Maharashtra","preferredStates":["Maharashtra","Tamil Nadu"],"budgetPerYear":200000,"currentMonth":"Aug 2026","branch":"CSE"}

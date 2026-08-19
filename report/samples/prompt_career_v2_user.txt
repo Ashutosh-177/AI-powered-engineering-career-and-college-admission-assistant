@@ -1,0 +1,43 @@
+## Example (few-shot)
+Input profile: {"interests": ["circuits", "coding"], "strongSubject": "Physics", "percentage": 88}
+Good output:
+{
+  "recommendations": [
+    {"branch": "ECE", "fitScore": 88, "reasoning": "Circuits interest plus strong Physics directly matches ECE's core coursework (signals, devices)."},
+    {"branch": "CSE", "fitScore": 80, "reasoning": "Coding interest is a strong CSE signal even though it's secondary to circuits here."}
+  ],
+  "needs_clarification": false
+}
+
+## Now do the same for this student
+{
+  "name": "Aarav",
+  "academicPercentage": 88,
+  "strongSubject": "Maths",
+  "interests": [
+    "coding",
+    "data science"
+  ],
+  "examIntent": true,
+  "collegeTypes": [
+    "NIT"
+  ],
+  "homeState": "Maharashtra",
+  "preferredStates": [
+    "Maharashtra",
+    "Tamil Nadu"
+  ],
+  "budgetPerYear": 200000,
+  "currentMonth": "Aug 2026",
+  "branch": "CSE"
+}
+
+## Output schema
+{
+  "needs_clarification": boolean,
+  "questions": ["..."],
+  "recommendations": [
+    {"branch": "<branch code from BRANCHES list>", "fitScore": 0-100, "reasoning": "<grounded in this student's specific inputs>"}
+  ]
+}
+Rank 3-5 branches by fitScore descending. Respond ONLY with a single valid JSON object matching the schema given. No prose outside the JSON. Every recommendation must include a "reasoning" field in plain language a 17-year-old student can understand. If the student profile is missing information you need, do not guess — instead return {"needs_clarification": true, "questions": ["..."]} listing at most 3 targeted questions.

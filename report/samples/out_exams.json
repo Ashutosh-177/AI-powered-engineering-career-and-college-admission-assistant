@@ -1,0 +1,9 @@
+{
+  "recommended_exams": [
+    {
+      "code": "JEE_MAIN",
+      "why_relevant": "Covers: NITs, IIITs, state/private colleges; qualifies for JEE Advanced.",
+      "priority": "primary"
+    }
+  ]
+}

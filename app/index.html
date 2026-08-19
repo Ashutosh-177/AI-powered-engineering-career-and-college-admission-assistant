@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PathFinder — Career &amp; College Admission Assistant</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🎓 PathFinder <span class="tagline">GenAI Career &amp; College Admission Assistant</span></div>
+  <span id="mode-badge" class="mode-badge">● Offline demo mode</span>
+</header>
+
+<nav class="tabs">
+  <button id="tab-profile" class="tab active" data-i="1. Profile">1. Profile</button>
+  <button id="tab-assistant" class="tab" data-i="2. Assistant">2. Assistant</button>
+  <button id="tab-colleges" class="tab" data-i="3. Colleges">3. Colleges</button>
+  <button id="tab-promptlab" class="tab" data-i="4. Prompt Lab">4. Prompt Lab</button>
+  <button id="tab-saved" class="tab" data-i="5. Saved & History">5. Saved &amp; History</button>
+  <button id="tab-settings" class="tab" data-i="6. Settings">6. Settings</button>
+</nav>
+
+<main>
+  <section id="panel-profile" class="panel active"></section>
+  <section id="panel-assistant" class="panel"></section>
+  <section id="panel-colleges" class="panel"></section>
+  <section id="panel-promptlab" class="panel"></section>
+  <section id="panel-saved" class="panel"></section>
+  <section id="panel-settings" class="panel"></section>
+</main>
+
+<footer class="footer">
+  Illustrative student prototype — not affiliated with AICTE/UGC/NBA/NAAC/JoSAA/CSAB. Always verify recommendations against official sources.
+</footer>
+
+<script src="data.js"></script>
+<script src="prompts.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
