@@ -34,25 +34,39 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small PAC -- Prompt Engineering for Generative AI}
+\fancyhead[L]{\small PAC -- PEGAI}
+\fancyhead[C]{\small Ashutosh Kumar Singh \textbullet\ 92301733016}
 \fancyhead[R]{\small\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
 \DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\scriptsize, breaklines=true, breaksymbolleft={}, frame=single, xleftmargin=2pt, xrightmargin=2pt}
 
-\title{\textbf{Practical Assessment Component (PAC) Report}\\[2pt]\Large Prompt Engineering for Generative AI\\[8pt]
+\title{\textbf{Practical Assessment Component (PAC) Report}\\[2pt]\Large Prompt Engineering for Generative AI (PEGAI)\\[8pt]
 \large PathFinder: A Generative AI-Powered Career and College\\ Admission Assistant for Engineering Aspirants}
-\author{}
+\author{\normalsize\textbf{Ashutosh Kumar Singh}\\[2pt]
+\normalsize Enrollment No.\ 92301733016\\[2pt]
+\normalsize Subject: PEGAI --- Prompt Engineering for Generative AI}
 \date{}
 
 \begin{document}
 \maketitle
-\vspace{-1.3cm}
+\vspace{-0.8cm}
 
 \noindent\textit{This report documents the design, prompt engineering methodology, and evaluation of \textbf{PathFinder}, a working web-based prototype built for this assignment. No official manual/rubric was supplied for this component, so the deliverable structure below (portfolio $\to$ interface $\to$ evaluation $\to$ validation $\to$ ethics) was designed directly from the assignment brief, following the same documentation discipline used in Case Study 1 and Case Study 2. The full source code accompanies this report in the \texttt{app/} folder; this document explains what was built and why, and reports honest evaluation results rather than assumed ones.}
 
-\section*{Course}
-Prompt Engineering for Generative AI
+\section*{Submission Details}
+\begin{tabular}{@{}l@{\hspace{1.2em}}p{11.2cm}@{}}
+\textbf{Name} & Ashutosh Kumar Singh \\
+\textbf{Enrollment No.} & 92301733016 \\
+\textbf{Subject} & PEGAI --- Prompt Engineering for Generative AI \\
+\textbf{Component} & Practical Assessment Component (PAC) \\
+\textbf{Project} & PathFinder --- GenAI Career \& College Admission Assistant \\[4pt]
+\textbf{Live demo} & \url{https://ashutosh-177.github.io/AI-powered-engineering-career-and-college-admission-assistant/} \\[3pt]
+\textbf{Source code} & \url{https://github.com/Ashutosh-177/AI-powered-engineering-career-and-college-admission-assistant} \\
+\end{tabular}
+
+\vspace{4pt}
+\noindent\small The live demo runs in offline mode by default, so it is fully explorable with no API key. Entering an Anthropic API key in the Settings tab switches the same prompts to live Claude responses.\normalsize
 
 \section*{Assignment Objective}
 Design and build an end-to-end, conversational Generative AI assistant that guides Indian Class 12 students through engineering career and college admission decisions -- career assessment, branch recommendation, college comparison, entrance exam selection, admission roadmap, scholarships, counselling guidance, and career prospects -- using reusable, well-engineered prompt workflows, and to evaluate that system for accuracy, transparency, fairness, and ethical AI usage.
@@ -87,6 +101,14 @@ Design and build an end-to-end, conversational Generative AI assistant that guid
 
 \section{System Overview}
 \label{sec:system}
+
+\subsection{Deployment}
+The prototype is deployed as a static site on GitHub Pages and is live at\\
+\url{https://ashutosh-177.github.io/AI-powered-engineering-career-and-college-admission-assistant/}\\
+with full source (app, report source, prompt-output samples) at\\
+\url{https://github.com/Ashutosh-177/AI-powered-engineering-career-and-college-admission-assistant}
+
+\noindent Because the app is a client-only static bundle with no backend, deployment is simply the repository itself --- which also means there is no server-side store of student data to breach (\S\ref{sec:privacy}), and no shared API key: the live site runs in offline mode for every visitor until they supply their own key locally.
 
 \subsection{Architecture decision}
 The brief asks for a website that ``integrates suitable Generative AI APIs'' and is demoable/gradeable without assuming the reviewer has an API key. Two modes were built on the \emph{same} prompt library:

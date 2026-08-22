@@ -1,6 +1,17 @@
 # PAC — PathFinder: GenAI Career & College Admission Assistant
 
+**▶ [Live demo](https://ashutosh-177.github.io/AI-powered-engineering-career-and-college-admission-assistant/)** · **[Report (PDF)](016_Ashutosh_PAC_Report.pdf)**
+
+| | |
+|---|---|
+| **Name** | Ashutosh Kumar Singh |
+| **Enrollment No.** | 92301733016 |
+| **Subject** | PEGAI — Prompt Engineering for Generative AI |
+| **Component** | Practical Assessment Component (PAC) |
+
 Practical Assessment Component for *Prompt Engineering for Generative AI*. No manual/rubric was supplied for this component, so both the prototype's scope and the report's structure were designed directly from the assignment brief (see `report/PAC_Report.tex`, intro note).
+
+The live demo runs in **offline mode by default** — fully explorable with no API key. Adding an Anthropic API key in the Settings tab switches the same prompts to live Claude responses; the key is stored only in your own browser and is never shared with other visitors.
 
 ## What's here
 
