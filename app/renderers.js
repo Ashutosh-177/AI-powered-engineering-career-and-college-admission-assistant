@@ -158,6 +158,10 @@ const STAGE_RENDERERS = {
 };
 
 function renderStageOutput(stageId, output, ctx) {
+  if (output && output.parse_error) {
+    return banner("warning", "Couldn't read the model's response as structured data — showing it raw. Try Regenerate.",
+      `<pre style="white-space:pre-wrap">${escapeHtml(output.raw || "")}</pre>`);
+  }
   const fn = STAGE_RENDERERS[stageId];
   return fn ? fn(output, ctx) : prettyRender(output);
 }

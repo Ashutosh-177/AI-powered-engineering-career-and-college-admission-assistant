@@ -42,11 +42,25 @@ const ENGINE = (() => {
     }
     const data = await res.json();
     const text = (data.content || []).map(b => b.text || "").join("");
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { raw: text, parse_error: true };
+    return parseModelJson(text);
+  }
+
+  /** Models frequently wrap JSON in markdown code fences (```json ... ```)
+   * even when told to respond with JSON only. Strip that, then fall back
+   * to extracting the first {...}/[...] block before giving up. */
+  function parseModelJson(text) {
+    const trimmed = text.trim();
+    const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+    const candidates = [fenced ? fenced[1] : null, trimmed];
+    for (const c of candidates) {
+      if (!c) continue;
+      try { return JSON.parse(c); } catch { /* try next */ }
     }
+    const blockMatch = trimmed.match(/[{\[][\s\S]*[}\]]/);
+    if (blockMatch) {
+      try { return JSON.parse(blockMatch[0]); } catch { /* give up below */ }
+    }
+    return { raw: text, parse_error: true };
   }
 
   // ------------------------------------------------------------- helpers --
