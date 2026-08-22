@@ -16,6 +16,12 @@ PAC/
     engine.js             Stage runner — calls the real Claude API if an API key is set
                           in Settings, otherwise runs a deterministic offline simulator
                           of the same prompt logic so the app is demoable with zero setup.
+    renderers.js          Per-stage UI components (score bars, ranked cards, timelines).
+                          Tolerates field-name drift in live model output and never
+                          renders a blank card.
+    hero3d.js             WebGL hero scene (Three.js). Procedural geometry — no model
+                          files to fetch. Degrades safely without WebGL, honours
+                          prefers-reduced-motion, pauses when off-screen.
   report/
     PAC_Report.tex / .pdf  The write-up: prompt portfolio, chaining design, V1-vs-V2
                           comparison, evaluation, hallucination/privacy strategy,

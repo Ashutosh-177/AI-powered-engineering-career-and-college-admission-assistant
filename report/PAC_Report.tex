@@ -77,11 +77,12 @@ Design and build an end-to-end, conversational Generative AI assistant that guid
 3 & Prompt Chaining design & How stage outputs feed downstream stages (\S\ref{sec:chaining}) \\
 4 & Multi-version comparison (Prompt Lab) & V1 (zero-shot) vs.\ V2 (engineered) side-by-side, editable and regenerable in-app (\S\ref{sec:versions}) \\
 5 & Iterative refinement mechanism & Feedback-driven revision prompt, reusable across all stages (\S\ref{sec:refine}) \\
-6 & Web interface & Six-tab UI: Profile, Assistant, Colleges, Prompt Lab, Saved \& History, Settings (\S\ref{sec:ui}) \\
-7 & Evaluation report & Accuracy, transparency, fairness, consistency, explainability, personalization, completeness, bias, reliability, ethics (\S\ref{sec:eval}) \\
-8 & Hallucination \& privacy strategy & Concrete mitigations implemented in the running code, not just discussed (\S\ref{sec:hallucination}, \S\ref{sec:privacy}) \\
-9 & Validation-against-official-sources plan & Workflow for checking AICTE / UGC / NBA / NAAC / NIRF / JoSAA / CSAB data (\S\ref{sec:validation}) \\
-10 & Limitations \& future work & Honest gaps between this prototype and a production system (\S\ref{sec:limitations}) \\
+6 & Web interface & Six-tab UI with a WebGL hero and per-stage presentation components (\S\ref{sec:ui}) \\
+7 & Live-mode failure analysis & Four real integration failures found testing against the Claude API, their causes, fixes, and the testing gap that hid them (\S\ref{sec:failures}) \\
+8 & Evaluation report & Accuracy, transparency, fairness, consistency, explainability, personalization, completeness, bias, reliability, ethics (\S\ref{sec:eval}) \\
+9 & Hallucination \& privacy strategy & Concrete mitigations implemented in the running code, not just discussed (\S\ref{sec:hallucination}, \S\ref{sec:privacy}) \\
+10 & Validation-against-official-sources plan & Workflow for checking AICTE / UGC / NBA / NAAC / NIRF / JoSAA / CSAB data (\S\ref{sec:validation}) \\
+11 & Limitations \& future work & Honest gaps between this prototype and a production system (\S\ref{sec:limitations}) \\
 \end{longtable}
 
 \section{System Overview}
@@ -100,15 +101,21 @@ In both modes the UI shows, for every AI response, a ``View prompt used'' panel 
 \subsection{File structure}
 \begin{code}
 app/
-  index.html      Six-tab shell
-  style.css       Theme
+  index.html      Six-tab shell + hero section
+  style.css       Design system
   data.js         Reference datasets (branches, exams, colleges, scholarships) -- explicitly
-                  labelled illustrative/unverified, see Sec. 6
-  prompts.js      The Prompt Engineering Portfolio (Sec. 2) -- system/V1/V2 builders per stage
-  engine.js       Stage runner: live Claude API call + offline simulators + V1-degradation
-                  for comparison + iterative-refinement runner
-  app.js          UI wiring: profile form, assistant flow, colleges table, Prompt Lab,
-                  saved/history, settings, localStorage persistence
+                  labelled illustrative/unverified
+  prompts.js      The Prompt Engineering Portfolio -- system/V1/V2 builders per stage
+  engine.js       Stage runner: live Claude API call (with tolerant JSON parsing) +
+                  offline simulators + V1-degradation for comparison +
+                  iterative-refinement runner + reference-data guard
+  renderers.js    Per-stage presentation components -- resolves ids/codes to names,
+                  renders score bars, ranked cards, timelines; tolerates field-name
+                  drift in live model output
+  hero3d.js       WebGL hero scene (Three.js), procedural geometry, degrades safely
+  app.js          UI wiring: profile form, assistant flow + stage chaining context,
+                  colleges table, Prompt Lab, saved/history, settings,
+                  localStorage persistence
 \end{code}
 
 \subsection{Data note}
@@ -267,8 +274,19 @@ In the UI, every stage card has an inline ``Refine'' box: the student types free
 \section{Web Interface}
 \label{sec:ui}
 
-The interface is a static six-tab single-page app (screenshots below are from the actual running prototype, driven end-to-end with Playwright as part of testing this report):
+The interface is a static six-tab single-page app (screenshots below are from the actual running prototype, driven end-to-end with Playwright as part of testing this report).
 
+\subsection{Design approach}
+The visual design deliberately splits the page into an \emph{expressive shell} and a \emph{calm content area}. The shell carries the identity: a WebGL hero scene (\texttt{hero3d.js}, Three.js) rendering a drifting constellation of polyhedra joined by lines -- a visual metaphor for the branching paths the app helps a student choose between -- over an aurora gradient, with a glass topbar and gradient pill tabs (Fig.~\ref{fig:hero}). The content area, where the actual advice lives, stays high-contrast and undecorated: dense comparative output is hard enough to read without animation behind it.
+
+Three consequences of that split are worth stating, since they were design decisions rather than defaults:
+\begin{itemize}
+\item The hero is scoped to the Profile tab only (via a \texttt{data-tab} attribute on \texttt{body}), so once the student is actually working the tool, the working area sits near the top of the viewport instead of below a permanent banner.
+\item On wide screens the 3D canvas is masked to the right half so it never sits behind the headline; under 900\,px it becomes a low-opacity full-bleed texture rather than competing for attention.
+\item All hero geometry is \emph{procedural} -- there are no \texttt{.glb}/\texttt{.gltf} asset files to fetch, so nothing can fail to load on GitHub Pages. The scene degrades safely at three levels: no WebGL or a blocked CDN hides the canvas and leaves the page fully functional; \texttt{prefers-reduced-motion} renders a single static frame; and rendering pauses whenever the hero scrolls out of view or the browser tab is hidden, so it costs nothing while the student is being advised.
+\end{itemize}
+
+\subsection{Tabs}
 \begin{enumerate}
 \item \textbf{Profile} -- academic \%, strongest subject, interests, target exam, target college types, home/preferred states, budget; an explicit, separately-collapsed optional section for gender/category/income/disability used \emph{only} by the scholarship stage (Fig.~\ref{fig:profile}).
 \item \textbf{Assistant} -- the guided, chained flow through all 8 stages, each stage showing its mode badge, structured output, prompt-view, refine box, and Continue button. Every stage has a purpose-built renderer rather than a generic JSON dump: branch fit scores as progress bars (Fig.~\ref{fig:assistant}), ranked colleges as cards with resolved names and color-coded strength/tradeoff lists (Fig.~\ref{fig:collegecards}), and similarly a timeline for the roadmap, a glossary grid for counselling terms, and a stat callout for salary range.
@@ -280,8 +298,15 @@ The interface is a static six-tab single-page app (screenshots below are from th
 
 \begin{figure}[htbp]
 \centering
+\includegraphics[width=0.92\textwidth]{figures/fig-hero.png}
+\caption{Landing view -- the WebGL hero (Three.js): procedural polyhedra linked by lines, masked to the right half so the headline stays fully legible. Hidden on every tab except Profile.}
+\label{fig:hero}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=0.85\textwidth]{figures/fig-profile.png}
-\caption{Profile tab, filled with a sample student profile.}
+\caption{Profile tab, filled with a sample student profile. Sensitive fields (gender/category/income/disability) sit in the separately-collapsed optional section at the bottom and are used only by the scholarship stage.}
 \label{fig:profile}
 \end{figure}
 
@@ -308,10 +333,70 @@ The interface is a static six-tab single-page app (screenshots below are from th
 
 \begin{figure}[htbp]
 \centering
+\includegraphics[width=0.78\textwidth]{figures/fig-roadmap.png}
+\caption{Admission Roadmap -- the chained stage (\S\ref{sec:chaining}) rendered as a gradient timeline, with document checklist and contingency notes as side panels.}
+\label{fig:roadmap}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/fig-prospects.png}
+\caption{Career Prospects -- salary shown as a caveated \emph{range} in a stat callout, never a single guaranteed figure (\S\ref{sec:hallucination}).}
+\label{fig:prospects}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=0.85\textwidth]{figures/fig-promptlab.png}
-\caption{Prompt Lab -- V1 (zero-shot) and V2 (engineered) templates, with V2's output rendered after running.}
+\caption{Prompt Lab -- V1 (zero-shot) and V2 (engineered) templates side by side. V1's output carries no grounded reasoning; V2's cites the specific interest and subject behind each recommendation.}
 \label{fig:promptlab}
 \end{figure}
+
+\section{Live-Mode Failure Modes Found in Testing}
+\label{sec:failures}
+
+The offline simulator behaved correctly from the start, but switching the same prompts to Live mode against the real Claude API surfaced four distinct integration failures. They are documented here rather than quietly patched, because each one is a general lesson about deploying LLM output into a structured UI -- and because the last one is a failure of \emph{my own testing method}, not of the model.
+
+\subsection{Symptom-by-symptom}
+\begin{longtable}{|p{2.9cm}|p{4.6cm}|p{6.0cm}|}
+\toprule
+\textbf{Failure} & \textbf{Cause} & \textbf{Fix} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Failure} & \textbf{Cause} & \textbf{Fix} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Card renders blank & Model wrapped valid JSON in a \texttt{```json} markdown fence despite a JSON-only instruction; \texttt{JSON.parse} threw and the failure was swallowed & \texttt{parseModelJson()} strips fences, then falls back to extracting the first \texttt{\{...\}} block; parse failure now shows the raw text in a banner instead of nothing \\
+JSON cut off mid-string & College Comparison output for 8 colleges exceeded \texttt{max\_tokens} (1200), truncating into invalid JSON & Raised the cap, \emph{and} capped output length at the prompt level (max 3 strengths, 2 tradeoffs, one $\le$25-word reasoning per college) so length cannot run away with candidate count \\
+Truncation misreported & A cut-off response was reported with the generic ``couldn't parse'' message & Threaded the API's \texttt{stop\_reason} through so genuine truncation says so explicitly \\
+Whole stages empty & \emph{See \S\ref{sec:refdata} -- the instructive one} & \texttt{stageCtx()} corrected + a guard that refuses to send the prompt \\
+\end{longtable}
+
+\subsection{The reference-data bug -- and why my testing missed it}
+\label{sec:refdata}
+Two stages build their prompts as \texttt{buildV2(profile, referenceData)}, but \texttt{stageCtx()} returned only \texttt{\{ profile \}} for them. \texttt{JSON.stringify(undefined)} yields \texttt{undefined}, which interpolated into the template as literal text:
+
+\begin{code}
+## ENTRANCE_EXAMS reference (do not invent exams outside this list)
+undefined
+\end{code}
+
+The model was instructed to choose only from that list, the list was the word ``undefined'', so it correctly returned \texttt{\{"recommended\_exams": []\}} -- an empty card. \textbf{The model behaved perfectly; the prompt was broken.} The same defect left Career Prospects with no branch data (rendering \texttt{NaN} for salary) and degraded the chained Admission Roadmap, which consumes the exam stage's output.
+
+The reason this survived earlier testing is the more important finding: \emph{every test had been run in offline mode, and the offline simulators read \texttt{ENTRANCE\_EXAMS}/\texttt{BRANCHES} directly and never touch the prompt string at all.} The test suite was structurally incapable of exercising the broken path. A prompt-driven system needs tests that assert on \emph{the generated prompt text}, not only on rendered output.
+
+\subsection{Resulting safeguards}
+\begin{itemize}
+\item \textbf{Fail loudly, not silently.} \texttt{runStage()} now throws if a builder declaring a reference-data parameter is invoked without one, rather than shipping a prompt containing ``undefined'' to the API.
+\item \textbf{Prompt-text auditing.} A harness builds the V2 prompt for all 8 stages exactly as the app does and asserts none contains a stray \texttt{undefined}, \texttt{[object Object]}, or an empty reference block. All 8 pass.
+\item \textbf{Tolerate field-name drift.} Live models occasionally rename schema keys (\texttt{exam} for \texttt{code}, \texttt{reason} for \texttt{why\_relevant}). Renderers resolve through a list of accepted aliases and omit absent fields rather than printing ``undefined''; a renderer suite covers 14 cases including deliberately renamed keys.
+\item \textbf{Never render nothing.} If a stage renderer produces visually empty markup for any reason, the UI falls back to a labelled raw-data view -- a silent blank card in front of a student (or an examiner) is the worst possible failure.
+\end{itemize}
+
+\noindent This is also the honest answer to the brief's ``reliability'' criterion: structured-output prompting is not a guarantee. A production system needs schema validation on every response, and the graceful-degradation path matters as much as the happy path.
 
 \section{Evaluation of AI-Generated Recommendations}
 \label{sec:eval}
@@ -332,9 +417,9 @@ Transparency & Every single AI response in the app ships with a visible ``View p
 Explainability & Every schema mandates a \texttt{reasoning} (or \texttt{why\_*}) field grounded in the student's own inputs (demonstrated in \S\ref{sec:versions}); V1's absence of this requirement is used deliberately to show what explainability looks like when it's \emph{missing}. \\
 Personalization & All eight prompts are template-filled from the specific student profile (interests, budget, state, category); College Comparison explicitly flags budget mismatches per student rather than giving one generic ranking. \\
 Completeness & Profile Intake \& Clarification stage runs first and refuses to proceed silently -- it asks up to 3 targeted questions when required fields are missing (demonstrated by \texttt{out\_intake\_incomplete.json} in \texttt{report/samples/}). \\
-Consistency & Fixed JSON schemas per stage keep output shape stable across runs; the offline simulator is fully deterministic. Live-mode consistency depends on the underlying model and is not guaranteed run-to-run -- a known limitation of LLM-based systems, mitigated by low-temperature settings recommended (not yet wired in) for factual stages. \\
+Consistency & Fixed JSON schemas per stage keep output shape stable across runs; the offline simulator is fully deterministic. Live-mode consistency proved weaker than the schema alone implies -- the model varied its wrapping (code fences), its verbosity (enough to overrun the token budget), and occasionally its key names between runs (\S\ref{sec:failures}), which is precisely why the parsing and rendering layers are now written defensively. Low-temperature settings for factual stages remain recommended but unimplemented. \\
 Fairness \& bias & Gender/category/income fields are collected only for the scholarship-matching stage, are optional, and never influence branch or college recommendations (verified by code inspection of \texttt{stageCtx()} -- these fields are absent from every context object except \texttt{scholarship\_finder}). Residual bias risk: the branch-keyword mapping in \texttt{data.js} reflects the author's own judgement of which interests map to which branch and was not validated against a counsellor or larger dataset. \\
-Reliability & Offline mode guarantees the app functions with zero external dependency; Live mode has explicit error handling that surfaces API failures in the UI rather than failing silently. \\
+Reliability & Offline mode guarantees the app functions with zero external dependency. Live mode initially failed in four distinct ways (\S\ref{sec:failures}) -- fenced JSON, token truncation, a broken reference-data hand-off, and field-name drift -- all now fixed and guarded, with a never-render-blank fallback. The honest conclusion is that structured-output prompting is not self-guaranteeing: a production system needs schema validation on every response. \\
 Ethical AI usage & System prompts explicitly instruct the assistant never to fabricate specific college/exam/scholarship facts and to say so when uncertain; salary/outlook figures are always presented as ranges with caveats, never guarantees; sensitive personal fields are clearly optional and scoped. \\
 \end{longtable}
 
@@ -378,15 +463,19 @@ Because this environment has no access to live AICTE / UGC / NBA / NAAC / NIRF /
 \label{sec:limitations}
 
 \begin{itemize}
-\item The offline simulator demonstrates the prompt design's intended behaviour deterministically but is not itself a language model; genuine reasoning quality, robustness to unusual phrasing, and multi-turn conversational nuance can only be assessed in Live mode with a real API key.
+\item The offline simulator demonstrates the prompt design's intended behaviour deterministically but is not itself a language model; genuine reasoning quality, robustness to unusual phrasing, and multi-turn conversational nuance can only be assessed in Live mode with a real API key. As \S\ref{sec:failures} shows, the simulator can also \emph{mask} real integration defects, so it should be treated as a demo affordance rather than as evidence the system works.
+\item There is no schema validation on live responses -- parsing is defensive and renderers tolerate aliases, but nothing formally validates a response against the declared schema and re-prompts on mismatch. That is the single most valuable next engineering step.
+\item The prompt-text audit and renderer suite are standalone scripts run manually, not a wired-up CI test suite.
 \item The reference dataset (8 colleges, 7 exams, 6 scholarship schemes) is a small illustrative sample, not the full national landscape, and is not currently re-validated on any schedule.
 \item No authentication, multi-device sync, or server persistence exists; the app is single-browser, single-device by design for this prototype.
 \item Only one model provider (Anthropic Claude) is integrated; a production system may want provider redundancy.
 \item Free-text refine/feedback input has no moderation layer -- acceptable for a course prototype, not for a public deployment.
-\item Accessibility (screen-reader labelling, keyboard navigation audit) and multi-language support (most target students are more comfortable in a regional language for this decision) were out of scope here but matter for real-world reach and fairness.
+\item Accessibility (screen-reader labelling, keyboard navigation audit) and multi-language support (most target students are more comfortable in a regional language for this decision) were out of scope here but matter for real-world reach and fairness. The hero scene does honour \texttt{prefers-reduced-motion}, but that is one narrow slice of accessibility, not a substitute for an audit.
 \end{itemize}
 
 \section{Conclusion}
-PathFinder demonstrates the full guidance journey the assignment specifies -- profile intake with ambiguity handling, chained multi-stage recommendations, multi-parameter college comparison, exam and scholarship matching, roadmap generation, and counselling explanation -- built on a documented library of role, structured, template, few-shot, chaining, and iterative-refinement prompts, with every recommendation traceable to the exact prompt that produced it. Its most important design choice is refusing to pretend: illustrative data is labelled as such, salary/placement claims are ranges with caveats, and the evaluation and validation sections above report real gaps rather than assumed compliance -- in keeping with the assignment's own emphasis on accuracy, transparency, and ethical AI usage over polish.
+PathFinder demonstrates the full guidance journey the assignment specifies -- profile intake with ambiguity handling, chained multi-stage recommendations, multi-parameter college comparison, exam and scholarship matching, roadmap generation, and counselling explanation -- built on a documented library of role, structured, template, few-shot, chaining, and iterative-refinement prompts, with every recommendation traceable to the exact prompt that produced it.
+
+Its most important design choice is refusing to pretend. Illustrative data is labelled as such; salary and placement claims are ranges with caveats; the evaluation and validation sections report real gaps rather than assumed compliance. \S\ref{sec:failures} extends that to the engineering itself: four live-integration failures are documented with their causes -- including one where a malformed prompt of my own making sent the word ``undefined'' to the model, and the model's empty answer was the correct response to it. The most transferable lesson from building this is that in a prompt-driven system the prompt is executable code and deserves to be tested as such: the reason that defect survived was a test suite that only ever exercised the offline path and never asserted on the generated prompt text.
 
 \end{document}
