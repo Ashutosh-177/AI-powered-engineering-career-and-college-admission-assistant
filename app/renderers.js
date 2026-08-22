@@ -159,7 +159,10 @@ const STAGE_RENDERERS = {
 
 function renderStageOutput(stageId, output, ctx) {
   if (output && output.parse_error) {
-    return banner("warning", "Couldn't read the model's response as structured data — showing it raw. Try Regenerate.",
+    const title = output.truncated
+      ? "The model's response was cut off before it finished (ran out of output tokens) — try Regenerate."
+      : "Couldn't read the model's response as structured data — showing it raw. Try Regenerate.";
+    return banner("warning", title,
       `<pre style="white-space:pre-wrap">${escapeHtml(output.raw || "")}</pre>`);
   }
   const fn = STAGE_RENDERERS[stageId];

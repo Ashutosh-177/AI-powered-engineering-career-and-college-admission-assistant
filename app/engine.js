@@ -31,7 +31,7 @@ const ENGINE = (() => {
       },
       body: JSON.stringify({
         model: CLAUDE_MODEL,
-        max_tokens: 1200,
+        max_tokens: 4096,
         system,
         messages: [{ role: "user", content: userMsg }],
       }),
@@ -42,13 +42,13 @@ const ENGINE = (() => {
     }
     const data = await res.json();
     const text = (data.content || []).map(b => b.text || "").join("");
-    return parseModelJson(text);
+    return parseModelJson(text, data.stop_reason);
   }
 
   /** Models frequently wrap JSON in markdown code fences (```json ... ```)
    * even when told to respond with JSON only. Strip that, then fall back
    * to extracting the first {...}/[...] block before giving up. */
-  function parseModelJson(text) {
+  function parseModelJson(text, stopReason) {
     const trimmed = text.trim();
     const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
     const candidates = [fenced ? fenced[1] : null, trimmed];
@@ -59,6 +59,9 @@ const ENGINE = (() => {
     const blockMatch = trimmed.match(/[{\[][\s\S]*[}\]]/);
     if (blockMatch) {
       try { return JSON.parse(blockMatch[0]); } catch { /* give up below */ }
+    }
+    if (stopReason === "max_tokens") {
+      return { raw: text, parse_error: true, truncated: true };
     }
     return { raw: text, parse_error: true };
   }
