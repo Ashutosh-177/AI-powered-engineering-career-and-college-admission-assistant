@@ -58,6 +58,8 @@ function showTab(id) {
     document.getElementById(`tab-${t}`).classList.toggle("active", t === id);
     document.getElementById(`panel-${t}`).classList.toggle("active", t === id);
   });
+  // Drives hero visibility in CSS — the 3D hero shows only on the first tab.
+  document.body.dataset.tab = id;
   if (id === "assistant") renderAssistantTab();
   if (id === "colleges") renderCollegesTab();
   if (id === "saved") renderSavedTab();
