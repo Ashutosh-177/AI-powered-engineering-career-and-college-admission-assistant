@@ -145,12 +145,14 @@ const STAGE_RENDERERS = {
   },
 
   career_prospects(output) {
-    const [low, high] = output.salary_range_lpa || [];
+    const range = Array.isArray(output.salary_range_lpa) ? output.salary_range_lpa : [];
+    const [low, high] = range;
+    const validRange = Number.isFinite(Number(low)) && Number.isFinite(Number(high));
     return `
-      <div class="stat-callout">
+      ${validRange ? `<div class="stat-callout">
         <div class="stat-value">${fmtINR(low)}–${fmtINR(high)} <span class="stat-unit">LPA</span></div>
         <div class="stat-label">Typical salary range</div>
-      </div>
+      </div>` : ""}
       <p>${escapeHtml(output.outlook_summary || "")}</p>
       ${chipList(output.higher_education_paths || [])}
       ${(output.caveats || []).length ? `<p class="muted small">⚠️ ${output.caveats.map(escapeHtml).join(" ")}</p>` : ""}`;
@@ -166,5 +168,11 @@ function renderStageOutput(stageId, output, ctx) {
       `<pre style="white-space:pre-wrap">${escapeHtml(output.raw || "")}</pre>`);
   }
   const fn = STAGE_RENDERERS[stageId];
-  return fn ? fn(output, ctx) : prettyRender(output);
+  const html = fn ? fn(output, ctx) : prettyRender(output);
+  const visibleText = html.replace(/<[^>]*>/g, "").trim();
+  if (!visibleText) {
+    return banner("info", "The model's answer didn't quite match the expected layout — showing the raw data instead.",
+      prettyRender(output));
+  }
+  return html;
 }

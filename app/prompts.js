@@ -20,7 +20,7 @@
    that explains what changed and why.
    ========================================================================== */
 
-const OUTPUT_CONTRACT = `Respond ONLY with a single valid JSON object matching the schema given. No prose outside the JSON. Every recommendation must include a "reasoning" field in plain language a 17-year-old student can understand. If the student profile is missing information you need, do not guess — instead return {"needs_clarification": true, "questions": ["..."]} listing at most 3 targeted questions.`;
+const OUTPUT_CONTRACT = `Respond ONLY with a single valid JSON object using EXACTLY the keys and structure shown in "Output schema" above — do not rename, add, remove, or restructure any key, and do not wrap it in another object or a markdown code fence. No prose outside the JSON. Write any explanatory text in plain language a 17-year-old student can understand, inside whichever field the schema already provides for it (e.g. "reasoning", "why_relevant", "explanation" — use the exact field name the schema gives, never invent a new one). Only if the schema above includes a "needs_clarification" field, and the student profile is genuinely missing information you need: do not guess — return that shape instead, still using exactly its own listed keys.`;
 
 const PROMPTS = {
 
