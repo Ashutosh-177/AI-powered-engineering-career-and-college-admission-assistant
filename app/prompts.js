@@ -94,15 +94,15 @@ ${JSON.stringify(colleges, null, 2)}
 ## Task
 Compare on: accreditation, research/infrastructure signal, industry collaboration, fees vs budget fit, placement rate & avg package, hostel, student review score. Produce a ranked shortlist with trade-offs made explicit (e.g., "higher fees but higher placement rate").
 
-## Output schema
+## Output schema — BE CONCISE, this covers every candidate college so length adds up fast
 {
   "ranked": [
-    {"collegeId": "...", "overallFit": 0-100, "strengths": ["..."], "tradeoffs": ["..."], "reasoning": "..."}
+    {"collegeId": "...", "overallFit": 0-100, "strengths": ["at most 3, each under 8 words"], "tradeoffs": ["at most 2, each under 8 words"], "reasoning": "ONE short sentence, under 25 words"}
   ],
   "budget_flags": ["colleges over stated budget, if any"],
   "verify_before_deciding": ["current NIRF ranking", "latest placement report", "AICTE approval status"]
 }
-${OUTPUT_CONTRACT}`,
+Include EVERY college from CANDIDATE_COLLEGES in "ranked", ranked best-fit first. Keep every field within the stated limits — brevity matters more than completeness of phrasing here. ${OUTPUT_CONTRACT}`,
     chainNote: "ranked[] feeds the shortlist users can save; budget_flags surface in the UI as warnings.",
   },
 
