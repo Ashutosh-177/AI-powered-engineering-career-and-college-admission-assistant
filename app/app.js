@@ -150,11 +150,20 @@ function stageCtx(stageId) {
   const profile = STORE.getProfile();
   switch (stageId) {
     case "college_comparison": return { profile, data: COLLEGES };
-    case "exam_recommendation": return { profile };
-    case "admission_roadmap": return { profile, extra: assistantState.results.exam_recommendation };
+    case "exam_recommendation": return { profile, data: ENTRANCE_EXAMS };
+    case "admission_roadmap": return {
+      profile,
+      // Chained context: prefer the real prior stage output, but never pass
+      // undefined into the prompt — fall back to the recommended exam list.
+      extra: assistantState.results.exam_recommendation
+        || { recommended_exams: [], note: "exam stage not run yet", reference_exams: ENTRANCE_EXAMS },
+    };
     case "scholarship_finder": return { profile, data: SCHOLARSHIPS };
     case "counselling_guidance": return { profile: { ...profile, primaryExam: assistantState.results.exam_recommendation?.recommended_exams?.[0]?.code } };
-    case "career_prospects": return { profile: { ...profile, branch: profile.branch } };
+    case "career_prospects": {
+      const branch = BRANCHES.find(b => b.code === profile.branch) || BRANCHES[0];
+      return { profile: { ...profile, branch: branch.code }, data: branch };
+    }
     default: return { profile };
   }
 }

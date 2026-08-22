@@ -262,6 +262,14 @@ const ENGINE = (() => {
     const buildFn = version === "v1" ? spec.buildV1 : spec.buildV2;
     const userMsg = buildFn(ctx.profile, ctx.data ?? ctx.extra);
 
+    // Guard: a builder that takes a second (reference-data) argument will
+    // interpolate the literal text "undefined" if the caller forgot to supply
+    // it — which silently instructs the model to pick from an empty list.
+    // Fail loudly here instead of shipping a broken prompt to the API.
+    if (buildFn.length > 1 && (ctx.data ?? ctx.extra) === undefined) {
+      throw new Error(`Stage "${stageId}" needs reference data but none was provided by stageCtx() — refusing to send a prompt containing "undefined".`);
+    }
+
     if (apiKey) {
       const output = await callClaudeLive(spec.system, userMsg, apiKey);
       return { mode: "live", version, prompt: { system: spec.system, user: userMsg }, output, technique: spec.technique };

@@ -8,6 +8,19 @@
    ========================================================================== */
 
 function fmtINR(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+/** First defined, non-empty value among the given keys. Live models
+ *  occasionally rename schema fields (exam/code, reason/why_relevant, …);
+ *  this keeps a renamed key from rendering as "undefined". */
+function pick(obj, ...keys) {
+  if (!obj || typeof obj !== "object") return undefined;
+  for (const k of keys) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return undefined;
+}
+/** Coerce a value the schema expects to be an array into one. */
+function asArray(v) { return Array.isArray(v) ? v : (v === undefined || v === null || v === "" ? [] : [v]); }
 function scoreTier(score) { return score >= 60 ? "high" : score >= 30 ? "mid" : "low"; }
 function chipList(items, cls = "chip static") {
   return items.length ? `<div class="chip-row">${items.map(i => `<span class="${cls}">${escapeHtml(i)}</span>`).join("")}</div>` : "";
@@ -84,32 +97,46 @@ const STAGE_RENDERERS = {
   },
 
   exam_recommendation(output) {
-    const cards = (output.recommended_exams || []).map(e => {
-      const ex = ENTRANCE_EXAMS.find(x => x.code === e.code);
+    const list = asArray(pick(output, "recommended_exams", "exams", "recommendations"));
+    const cards = list.map(e => {
+      const code = pick(e, "code", "exam", "exam_code", "name");
+      const ex = ENTRANCE_EXAMS.find(x => x.code === code || x.name === code);
+      const priority = pick(e, "priority", "rank", "tier");
+      const why = pick(e, "why_relevant", "reasoning", "reason", "explanation", "why");
+      const label = ex ? ex.name : code;
+      if (!label && !why) return "";
       return `
         <div class="exam-card">
           <div class="exam-card-head">
-            <span class="badge ${e.priority === "primary" ? "badge-live" : "badge-code"}">${escapeHtml(e.priority)}</span>
-            <span class="exam-name">${escapeHtml(ex ? ex.name : e.code)}</span>
+            ${priority ? `<span class="badge ${String(priority).toLowerCase() === "primary" ? "badge-live" : "badge-code"}">${escapeHtml(priority)}</span>` : ""}
+            <span class="exam-name">${escapeHtml(label || "Exam")}</span>
           </div>
-          <p class="muted">${escapeHtml(e.why_relevant)}</p>
+          ${why ? `<p class="muted">${escapeHtml(why)}</p>` : ""}
+          ${ex ? `<p class="muted small">${escapeHtml(ex.scope)} · Typically: ${escapeHtml(ex.typicalWindow)}</p>` : ""}
         </div>`;
     }).join("");
     return `<div class="exam-list">${cards}</div>`;
   },
 
   admission_roadmap(output) {
-    const steps = (output.timeline || []).map(t => `
+    const timeline = asArray(pick(output, "timeline", "roadmap", "steps", "phases"));
+    const steps = timeline.map(t => {
+      const period = pick(t, "period", "month", "timeframe", "when", "date");
+      const milestone = pick(t, "milestone", "goal", "task", "title", "step");
+      const actions = asArray(pick(t, "action_items", "actions", "tasks", "todo"));
+      if (!period && !milestone && !actions.length) return "";
+      return `
       <div class="tl-step">
         <div class="tl-dot"></div>
         <div class="tl-body">
-          <div class="tl-period">${escapeHtml(t.period)}</div>
-          <div class="tl-milestone">${escapeHtml(t.milestone)}</div>
-          ${(t.action_items || []).length ? `<ul class="pretty-list">${t.action_items.map(a => `<li>${escapeHtml(a)}</li>`).join("")}</ul>` : ""}
+          ${period ? `<div class="tl-period">${escapeHtml(period)}</div>` : ""}
+          ${milestone ? `<div class="tl-milestone">${escapeHtml(milestone)}</div>` : ""}
+          ${actions.length ? `<ul class="pretty-list">${actions.map(a => `<li>${escapeHtml(a)}</li>`).join("")}</ul>` : ""}
         </div>
-      </div>`).join("");
-    const docs = (output.document_checklist || []).map(d => `<li>☐ ${escapeHtml(d)}</li>`).join("");
-    const notes = (output.contingency_notes || []).map(n => `<li>💡 ${escapeHtml(n)}</li>`).join("");
+      </div>`;
+    }).join("");
+    const docs = asArray(pick(output, "document_checklist", "documents", "checklist")).map(d => `<li>☐ ${escapeHtml(d)}</li>`).join("");
+    const notes = asArray(pick(output, "contingency_notes", "contingencies", "notes")).map(n => `<li>💡 ${escapeHtml(n)}</li>`).join("");
     return `
       <div class="timeline">${steps}</div>
       <div class="roadmap-extra">
@@ -120,24 +147,40 @@ const STAGE_RENDERERS = {
 
   scholarship_finder(output) {
     const likelihoodClass = { likely: "badge-live", possible: "badge-code", "check details": "badge-warn" };
-    const cards = (output.matches || []).map(m => `
+    const list = asArray(pick(output, "matches", "scholarships", "recommendations"));
+    const cards = list.map(m => {
+      const name = pick(m, "name", "scheme", "scholarship", "title");
+      const likelihood = pick(m, "likelihood", "eligibility", "confidence", "status");
+      const why = pick(m, "reasoning", "reason", "why", "explanation");
+      const action = pick(m, "action", "how_to_apply", "next_step", "apply");
+      if (!name && !why) return "";
+      return `
       <div class="scholarship-card">
         <div class="scholarship-head">
-          <span class="scholarship-name">${escapeHtml(m.name)}</span>
-          <span class="badge ${likelihoodClass[m.likelihood] || "badge-code"}">${escapeHtml(m.likelihood)}</span>
+          <span class="scholarship-name">${escapeHtml(name || "Scholarship")}</span>
+          ${likelihood ? `<span class="badge ${likelihoodClass[String(likelihood).toLowerCase()] || "badge-code"}">${escapeHtml(likelihood)}</span>` : ""}
         </div>
-        <p class="muted">${escapeHtml(m.reasoning)}</p>
-        <p class="scholarship-action">→ ${escapeHtml(m.action)}</p>
-      </div>`).join("");
+        ${why ? `<p class="muted">${escapeHtml(why)}</p>` : ""}
+        ${action ? `<p class="scholarship-action">→ ${escapeHtml(action)}</p>` : ""}
+      </div>`;
+    }).join("");
     return `<div class="scholarship-list">${cards}</div>`;
   },
 
   counselling_guidance(output) {
-    const steps = (output.steps || []).map((s, i) => `
-      <li><strong>${escapeHtml(s.step)}</strong> — ${escapeHtml(s.explanation)}</li>`).join("");
-    const terms = (output.key_terms || []).map(t => `
-      <div class="term-row"><span class="term-name">${escapeHtml(t.term)}</span><span class="muted">${escapeHtml(t.meaning)}</span></div>`).join("");
-    const sources = output.official_sources || [];
+    const steps = asArray(pick(output, "steps", "process", "stages")).map(s => {
+      const label = pick(s, "step", "name", "title", "stage");
+      const explanation = pick(s, "explanation", "reasoning", "detail", "description", "why");
+      if (!label && !explanation) return "";
+      return `<li>${label ? `<strong>${escapeHtml(label)}</strong>` : ""}${label && explanation ? " — " : ""}${explanation ? escapeHtml(explanation) : ""}</li>`;
+    }).join("");
+    const terms = asArray(pick(output, "key_terms", "terms", "glossary")).map(t => {
+      const term = pick(t, "term", "name", "word");
+      const meaning = pick(t, "meaning", "definition", "explanation", "description");
+      if (!term && !meaning) return "";
+      return `<div class="term-row">${term ? `<span class="term-name">${escapeHtml(term)}</span>` : ""}${meaning ? `<span class="muted">${escapeHtml(meaning)}</span>` : ""}</div>`;
+    }).join("");
+    const sources = asArray(pick(output, "official_sources", "sources", "references"));
     return `
       <ol class="counsel-steps">${steps}</ol>
       ${terms ? `<div class="term-grid">${terms}</div>` : ""}
@@ -145,17 +188,20 @@ const STAGE_RENDERERS = {
   },
 
   career_prospects(output) {
-    const range = Array.isArray(output.salary_range_lpa) ? output.salary_range_lpa : [];
+    const range = asArray(pick(output, "salary_range_lpa", "salary_range", "salaryRange"));
     const [low, high] = range;
     const validRange = Number.isFinite(Number(low)) && Number.isFinite(Number(high));
+    const summary = pick(output, "outlook_summary", "outlook", "summary", "reasoning") || "";
+    const paths = asArray(pick(output, "higher_education_paths", "higher_education", "further_study"));
+    const caveats = asArray(pick(output, "caveats", "notes", "disclaimers"));
     return `
       ${validRange ? `<div class="stat-callout">
         <div class="stat-value">${fmtINR(low)}–${fmtINR(high)} <span class="stat-unit">LPA</span></div>
         <div class="stat-label">Typical salary range</div>
       </div>` : ""}
-      <p>${escapeHtml(output.outlook_summary || "")}</p>
-      ${chipList(output.higher_education_paths || [])}
-      ${(output.caveats || []).length ? `<p class="muted small">⚠️ ${output.caveats.map(escapeHtml).join(" ")}</p>` : ""}`;
+      ${summary ? `<p>${escapeHtml(summary)}</p>` : ""}
+      ${chipList(paths)}
+      ${caveats.length ? `<p class="muted small">⚠️ ${caveats.map(escapeHtml).join(" ")}</p>` : ""}`;
   },
 };
 
